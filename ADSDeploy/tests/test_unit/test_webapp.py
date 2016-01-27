@@ -219,21 +219,35 @@ class TestStaticMethodUtilities(TestCase):
         instance_rabbit.publish.side_effect = None
 
         payload = {
+            'exchange': 'test',
+            'route': 'test',
             'repository': 'important-service',
             'commit': 'da89fuhds',
             'environment': 'staging',
             'author': 'author',
             'tag': 'da89fuhds',
         }
+        payload_copy = payload.copy()
 
-        GithubListener.push_rabbitmq(payload)
+        GithubListener.push_rabbitmq(payload_copy)
 
         self.assertTrue(mocked_rabbit.called)
 
-        instance_rabbit.publish.assert_has_calls([
-            mock.call(exchange='test', route='test', payload=payload)
-        ])
+        c = instance_rabbit.publish.call_args[1]
 
+        self.assertEqual(
+            c['route'],
+            payload.pop('route')
+        )
+        self.assertEqual(
+            c['exchange'],
+            payload.pop('exchange')
+        )
 
-
-
+        p = json.loads(c['payload'])
+        for key in payload:
+            self.assertEqual(
+                payload[key],
+                p.get(key, None),
+                msg='key "{}" not found in call {}'.format(key, p)
+            )

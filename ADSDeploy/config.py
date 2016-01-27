@@ -9,7 +9,7 @@ SQLALCHEMY_ECHO = False
 # Configuration of the pipeline; if you start 'vagrant up rabbitmq' 
 # container, the port is localhost:8072 - but for production, you 
 # want to point to the ADSImport pipeline 
-RABBITMQ_URL = 'amqp://guest:guest@localhost:6672/?' \
+RABBITMQ_URL = 'amqp://guest:guest@172.17.0.1:6672/?' \
                'socket_timeout=10&backpressure_detection=t'
                
 
@@ -37,6 +37,8 @@ WORKERS = {
 
 
 # Web Application configuration parameters
+WEBAPP_URL = '172.17.0.1:9000'
+
 GITHUB_SIGNATURE_HEADER = 'X-Hub-Signature'
 GITHUB_SECRET = 'redacted'
 GITHUB_COMMIT_API = 'https://api.github.com/repos/adsabs/{repo}/git/commits/{hash}'

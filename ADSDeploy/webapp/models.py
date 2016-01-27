@@ -22,7 +22,7 @@ class Packet(db.Model):
     repository = Column(String)
     deployed = Column(Boolean, default=False)
     tested = Column(Boolean, default=False)
-    environment = Column(String)
+    application = Column(String)
 
     def __repr__(self):
         return '<Packet (id: {}, commit: {}, tag: {}, timestamp: {}, ' \
@@ -30,6 +30,5 @@ class Packet(db.Model):
                'environment: {}'.format(
                     self.id, self.commit, self.tag, self.timestamp, self.author,
                     self.repository, self.deployed, self.tested,
-                    self.environment
+                    self.application
                )
-

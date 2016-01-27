@@ -2,11 +2,12 @@
 Test webservices
 """
 
+import json
 import mock
+
 from ADSDeploy.webapp import app
 from flask import url_for
 from flask.ext.testing import TestCase
-
 from stub_data.stub_webapp import github_payload
 
 
@@ -64,8 +65,35 @@ class TestEndpoints(TestCase):
             'repository': 'adsws',
             'commit': 'bcdf7771aa10d78d865c61e5336145e335e30427',
             'environment': 'sandbox',
-            'author': 'vsudilov'
+            'author': 'vsudilov',
+            'tag': None
         }
 
         mocked_rabbit.assert_called_once_with(expected_packet)
         mocked_db.assert_called_once_with(expected_packet)
+
+    @mock.patch('ADSDeploy.webapp.views.GithubListener')
+    def test_rabbitmqlistener_forwards_message(self, mocked_gh):
+        """
+        Tests that the RabbitMQ parses and forwards the messages to the
+        relevant queues
+        """
+
+        mocked_gh.push_rabbitmq.return_value = None
+
+        url = url_for('rabbitmqlistener')
+
+        payload = {
+            'queue': 'deploy',
+            'commit': '23d3f',
+            'service': 'adsws'
+        }
+
+        r = self.client.post(url, data=json.dumps(payload))
+
+        self.assertStatus(r, 200)
+        self.assertEqual(r.json['msg'], 'success')
+
+        mocked_gh.push_rabbitmq.assert_has_calls(
+            [mock.call(payload)]
+        )
